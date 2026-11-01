@@ -105,4 +105,4 @@ docker exec -it juice-db psql -U postgres -d settlement -f /tmp/data/schema.sql
 # 이후 COPY로 적재 (위 1번 참고)
 ```
 
-수치는 기본 GitHub Codespace 환경 기준이며 실행 환경에 따라 달라질 수 있습니다.# settlement-db
+수치는 기본 GitHub Codespace 환경 기준이며 실행 환경에 따라 달라질 수 있습니다.
