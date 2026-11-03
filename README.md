@@ -35,6 +35,7 @@ content ──┤                     ├─→ settlement
 |---|---|
 | `schema.sql` | V1: 5개 테이블 생성 |
 | `generate.py` | 합성 데이터 생성 (seed 고정, 재현 가능) |
+| `load.sql` | 참조 순서대로 COPY 적재, 시퀀스 동기화, 건수 확인 |
 | `V2__add_sales_index.sql` | V2: 조회 성능 개선용 복합 인덱스 |
 
 ## 데이터
@@ -102,6 +103,8 @@ docker run --name juice-db -e POSTGRES_PASSWORD=<password> -e POSTGRES_DB=settle
 python3 generate.py
 docker cp . juice-db:/tmp/data
 docker exec -it juice-db psql -U postgres -d settlement -f /tmp/data/schema.sql
+docker exec -it juice-db psql -U postgres -d settlement -f /tmp/data/load.sql
+docker exec -it juice-db psql -U postgres -d settlement -f /tmp/data/V2__add_sales_index.sql
 # 이후 COPY로 적재 (위 1번 참고)
 ```
 
