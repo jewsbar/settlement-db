@@ -37,6 +37,9 @@ content ──┤                     ├─→ settlement
 | `generate.py` | 합성 데이터 생성 (seed 고정, 재현 가능) |
 | `load.sql` | 참조 순서대로 COPY 적재, 시퀀스 동기화, 건수 확인 |
 | `V2__add_sales_index.sql` | V2: 조회 성능 개선용 복합 인덱스 |
+| `queries.sql` | 미정산 조회, 미정산 내역, 월별 정산 현황 쿼리 |
+| `explain.md` | 인덱스 전후 실행계획(`EXPLAIN ANALYZE`) 원문 |
+| `backup_restore.md` | 백업, 별도 DB 복구, 원본 대조 기록 |
 
 ## 데이터
 
@@ -61,11 +64,15 @@ content ──┤                     ├─→ settlement
 - 적재 데이터를 csv로 다시 추출해 원본과 `diff` 비교 → 차이 0
 - id를 직접 적재한 뒤 시퀀스가 1에 머물러 `duplicate key` 오류가 나는 것을 재현하고, `setval`로 실제 최대 id에 동기화
 
+→ 적재 스크립트: [load.sql](load.sql)
+
 ### 2. 조회 쿼리
 
 - 미정산 조회: `NOT EXISTS`로 2,688건 → 생성 시점 정답과 일치
 - 미정산 내역: `JOIN`으로 플랫폼명·곡명을 붙인 목록
 - 월별 정산 현황: `LEFT JOIN` + `GROUP BY`로 월별 매출/정산 건수·금액 집계
+
+→ 쿼리: [queries.sql](queries.sql)
 
 ### 3. 실행계획과 인덱스
 
@@ -79,6 +86,8 @@ PostgreSQL은 외래키 칸에 인덱스를 자동으로 만들지 않습니다.
 ```sql
 CREATE INDEX idx_sales_platform_content ON sales_raw (platform_id, content_id);
 ```
+
+→ 실행계획 원문과 캐시 상태에 따른 차이: [explain.md](explain.md)
 
 ### 4. 트랜잭션과 잠금
 
@@ -95,6 +104,8 @@ CREATE INDEX idx_sales_platform_content ON sales_raw (platform_id, content_id);
 | `pg_dump` 전체 백업 | 12 MB, 0.9초 |
 | 별도 DB(`settlement_restore`)에 복구 (`ON_ERROR_STOP=1`) | 1.8초, 오류 없음 |
 | 원본과 대조 (5개 테이블 건수 + 매출·정산 금액 합계) | 7개 값 모두 일치 |
+
+→ 실행한 명령, 대조 쿼리와 결과: [backup_restore.md](backup_restore.md)
 
 ## 재현 방법
 
